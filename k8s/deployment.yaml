@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+spec:
+  replicas: 3  # Number of desired pods
+  selector:
+    matchLabels:
+      app: my-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1       # How many extra pods to run during the update
+      maxUnavailable: 1 # How many pods can be unavailable during the update
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: moravak/todo-app:latest # Replace with your image
+        ports:
+        - containerPort: 5173  # Exposed port
+        readinessProbe:      # Add a readiness probe to ensure smooth updates
+          httpGet:
+            path: /
+            port: 5173
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:       # Add a liveness probe to check app health
+          httpGet:
+            path: /
+            port: 5173
+          initialDelaySeconds: 10
+          periodSeconds: 20
