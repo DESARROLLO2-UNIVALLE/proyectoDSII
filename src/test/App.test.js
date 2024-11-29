@@ -108,4 +108,58 @@ describe("ToDoList Component", () => {
       expect(taskElement).toBeInTheDocument();
     });
   });
+
+  test("marks task as complete using Enter key", () => {
+    render(<ToDoList />);
+
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
+
+    // Add a task
+    fireEvent.change(inputElement, {
+      target: { value: "Keyboard complete test" },
+    });
+    fireEvent.click(addButton);
+
+    // Find the task span and focus it
+    const taskElement = screen.getByText("Keyboard complete test");
+    fireEvent.keyDown(taskElement, { key: "Enter", code: "Enter" });
+
+    // Check if task has completed class
+    expect(taskElement.closest("li")).toHaveClass("completed");
+  });
+
+  test("marks task as complete using Space key", () => {
+    render(<ToDoList />);
+
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
+
+    // Add a task
+    fireEvent.change(inputElement, {
+      target: { value: "Space key complete test" },
+    });
+    fireEvent.click(addButton);
+
+    // Find the task span and focus it
+    const taskElement = screen.getByText("Space key complete test");
+    fireEvent.keyDown(taskElement, { key: " ", code: "Space" });
+
+    // Check if task has completed class
+    expect(taskElement.closest("li")).toHaveClass("completed");
+  });
+
+  test("adds task using Enter key in input field", () => {
+    render(<ToDoList />);
+
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+
+    // Type a task and press Enter
+    fireEvent.change(inputElement, { target: { value: "Enter key task" } });
+    fireEvent.keyDown(inputElement, { key: "Enter", code: "Enter" });
+
+    // Check if task is added to the list
+    const taskElement = screen.getByText("Enter key task");
+    expect(taskElement).toBeInTheDocument();
+  });
 });
