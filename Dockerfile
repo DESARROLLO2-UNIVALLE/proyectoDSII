@@ -27,7 +27,7 @@ EXPOSE 5173
 RUN npm run build
 
 # Install a lightweight HTTP server to serve the built app
-RUN npm install -g serve
+RUN npm install -g serve --ignore-scripts
 
 RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
