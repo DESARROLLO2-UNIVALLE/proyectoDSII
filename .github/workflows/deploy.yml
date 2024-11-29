@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - master # Trigger the workflow only on pushes to the master branch
+      - master  # Trigger the workflow only on pushes to the master branch
 
 jobs:
   build-and-push:
@@ -21,10 +21,27 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 3: Build and push the Docker image
+      # Step 3: Build and Push Docker Image
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          context: . # Path to the Dockerfile (project root)
-          push: true # Push the image to Docker Hub
+          context: .  # Path to the Dockerfile (project root)
+          push: true   # Push the image to Docker Hub
           tags: ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
+
+      # Step 4: Connect to AWS EC2 and deploy
+      - name: Connect to EC2 and deploy
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}  # Your EC2 instance IP address or domain
+          username: ${{ secrets.EC2_USER }}  # EC2 SSH username (usually 'ec2-user' for Amazon Linux)
+          key: ${{ secrets.EC2_SSH_KEY }}  # SSH private key (store this in GitHub Secrets)
+          port: 22  # SSH port (default is 22)
+          script: |
+            cd ~/todo-app
+            wget -O deployment.yaml "https://github.com/DESARROLLO2-UNIVALLE/proyectoDSII/raw/refs/heads/master/k8s/deployment.yaml"
+            wget -O service.yaml "https://github.com/DESARROLLO2-UNIVALLE/proyectoDSII/raw/refs/heads/master/k8s/service.yaml"
+            kubectl apply -f deployment.yaml
+            kubectl apply -f service.yaml
+            
+

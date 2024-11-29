@@ -11,4 +11,5 @@ spec:
     - protocol: TCP
       port: 5173 # Exposed service port
       targetPort: 5173 # Pod container port
-  type: LoadBalancer # Change to NodePort if not using a cloud provider
+      nodePort: 30080
+  type: NodePort

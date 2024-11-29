@@ -1,38 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app-deployment
+  name: todo-app-deployment
   labels:
-    app: my-app
+    app: todo-app
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: my-app
+      app: todo-app
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
-        app: my-app
+        app: todo-app
     spec:
       containers:
-      - name: my-app
-        image: moravak/todo-app:latest
-        ports:
-        - containerPort: 5173
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 5173
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 5173
-          initialDelaySeconds: 10
-          periodSeconds: 20
+        - name: todo-app
+          image: moravak/todo-app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5173
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5173
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5173
+            initialDelaySeconds: 10
+            periodSeconds: 20
