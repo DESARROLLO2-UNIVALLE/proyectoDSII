@@ -9,9 +9,6 @@ export default [
   { ignores: ["dist"] },
   {
     files: ["**/*.{js,jsx}", "**/*.test.js", "**/*.test.jsx"],
-    plugins: {
-      jest: jestPlugin,
-    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: [
@@ -32,6 +29,7 @@ export default [
     },
     settings: { react: { version: "18.3" } },
     plugins: {
+      jest: jestPlugin,
       react,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
