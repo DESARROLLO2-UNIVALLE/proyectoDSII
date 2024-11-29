@@ -1,84 +1,111 @@
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import TodoList from "../components/TodoList.jsx";
+import ToDoList from "../components/TodoList/TodoList";
 
-import React from "react";
+describe("ToDoList Component", () => {
+  // Test initial render
+  test("renders input field and add button", () => {
+    render(<ToDoList />);
 
-describe("TodoList", () => {
-  test("renders the TodoList component", () => {
-    render(<TodoList />);
-    expect(screen.getByText(/Todo List/i)).toBeInTheDocument();
+    // Check if input field exists
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    expect(inputElement).toBeInTheDocument();
+
+    // Check if add button exists
+    const addButton = screen.getByText("Add");
+    expect(addButton).toBeInTheDocument();
   });
 
-  test("can add a new task", () => {
-    render(<TodoList />);
-    fireEvent.change(screen.getByPlaceholderText("Add a task"), {
-      target: { value: "Test Task" },
-    });
-    fireEvent.click(screen.getByText("Add"));
+  // Test adding a task
+  test("adds a new task when add button is clicked", () => {
+    render(<ToDoList />);
 
-    expect(screen.getByText("Test Task")).toBeInTheDocument();
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
+
+    // Type a task and click add
+    fireEvent.change(inputElement, { target: { value: "New test task" } });
+    fireEvent.click(addButton);
+
+    // Check if task is added to the list
+    const taskElement = screen.getByText("New test task");
+    expect(taskElement).toBeInTheDocument();
   });
 
+  // Test adding an empty task
   test("does not add an empty task", () => {
-    render(<TodoList />);
+    render(<ToDoList />);
 
-    // Contamos cuántas tareas hay inicialmente
-    const initialTaskCount = screen.queryAllByRole("listitem").length;
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
 
-    // Intentamos agregar una tarea vacía
-    fireEvent.change(screen.getByPlaceholderText("Add a task"), {
-      target: { value: "" },
-    });
-    fireEvent.click(screen.getByText("Add"));
+    // Try to add an empty task
+    fireEvent.change(inputElement, { target: { value: "   " } });
+    fireEvent.click(addButton);
 
-    // Verificamos que la cantidad de tareas siga siendo la misma
-    const finalTaskCount = screen.queryAllByRole("listitem").length;
-    expect(finalTaskCount).toBe(initialTaskCount);
+    // Check that no task is added
+    const taskList = screen.queryByRole("list");
+    expect(taskList.children.length).toBe(0);
   });
 
-  test("can mark a task as complete", () => {
-    render(<TodoList />);
-    fireEvent.change(screen.getByPlaceholderText("Add a task"), {
-      target: { value: "Complete Task" },
-    });
-    fireEvent.click(screen.getByText("Add"));
+  // Test task completion toggle
+  test("toggles task completion when task is clicked", () => {
+    render(<ToDoList />);
 
-    fireEvent.click(screen.getByText("Complete"));
-    const task = screen.getByText("Complete Task");
-    expect(task).toHaveStyle("text-decoration: line-through");
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
+
+    // Add a task
+    fireEvent.change(inputElement, { target: { value: "Toggle test task" } });
+    fireEvent.click(addButton);
+
+    // Find the task and click to toggle
+    const taskElement = screen.getByText("Toggle test task");
+    fireEvent.click(taskElement);
+
+    // Check if task has completed class
+    expect(taskElement.closest("li")).toHaveClass("completed");
   });
 
-  test("can undo a completed task", () => {
-    render(<TodoList />);
-    fireEvent.change(screen.getByPlaceholderText("Add a task"), {
-      target: { value: "Undo Task" },
-    });
-    fireEvent.click(screen.getByText("Add"));
+  // Test task deletion
+  test("deletes a task when delete button is clicked", () => {
+    render(<ToDoList />);
 
-    fireEvent.click(screen.getByText("Complete"));
-    fireEvent.click(screen.getByText("Undo"));
-    const task = screen.getByText("Undo Task");
-    expect(task).toHaveStyle("text-decoration: none");
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
+
+    // Add a task
+    fireEvent.change(inputElement, { target: { value: "Delete test task" } });
+    fireEvent.click(addButton);
+
+    // Find and click delete button
+    const deleteButton = screen.getByText("Delete");
+    fireEvent.click(deleteButton);
+
+    // Check that task is removed
+    const taskElement = screen.queryByText("Delete test task");
+    expect(taskElement).not.toBeInTheDocument();
   });
 
-  test("can delete a task", () => {
-    render(<TodoList />);
-    fireEvent.change(screen.getByPlaceholderText("Add a task"), {
-      target: { value: "Delete Task" },
+  // Test multiple tasks
+  test("can add multiple tasks", () => {
+    render(<ToDoList />);
+
+    const inputElement = screen.getByPlaceholderText("Add a new task");
+    const addButton = screen.getByText("Add");
+
+    // Add multiple tasks
+    const tasks = ["First task", "Second task", "Third task"];
+    tasks.forEach((task) => {
+      fireEvent.change(inputElement, { target: { value: task } });
+      fireEvent.click(addButton);
     });
-    fireEvent.click(screen.getByText("Add"));
 
-    fireEvent.click(screen.getByText("Delete"));
-    expect(screen.queryByText("Delete Task")).not.toBeInTheDocument();
-  });
-
-  test("input is cleared after adding a task", () => {
-    render(<TodoList />);
-    const input = screen.getByPlaceholderText("Add a task");
-    fireEvent.change(input, { target: { value: "Clear Input Task" } });
-    fireEvent.click(screen.getByText("Add"));
-
-    expect(input.value).toBe("");
+    // Check all tasks are present
+    tasks.forEach((task) => {
+      const taskElement = screen.getByText(task);
+      expect(taskElement).toBeInTheDocument();
+    });
   });
 });
