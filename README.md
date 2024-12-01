@@ -84,7 +84,7 @@ PROYECTODSII/
   ```bash
   npm run dev
   ```
-- Abrir en el navegador: `http://localhost:3000`
+- Abrir en el navegador: `http://localhost:5173`
 
 ### 4. Contenerización
 
@@ -94,7 +94,7 @@ PROYECTODSII/
   ```
 - Ejecutar el contenedor:
   ```bash
-  docker run -p 3000:3000 proyectodsii
+  docker run -p 5173:5173 proyectodsii
   ```
 
 ### 5. Despliegue en Kubernetes
@@ -109,15 +109,37 @@ PROYECTODSII/
 
 ## Descripción del Workflow
 
+Este proyecto utiliza **GitHub Actions** para gestionar los procesos de **Integración Continua (CI)** y **Despliegue Continuo (CD)**.
+
 ### Integración Continua (CI)
 
-- **Archivo**: `.github/workflows/tests.yml`
-- **Descripción**: Ejecuta pruebas automatizadas usando Jest para validar la calidad del código.
+El workflow de CI asegura la calidad del código al ejecutar pruebas y análisis en cada cambio relevante.  
+
+#### 1. Test  
+Este workflow se ejecuta cuando se realiza un push a la rama `main` o al abrir un Pull Request. Sus pasos incluyen:  
+
+- **Instalación de Java 17**: Configura el entorno con la versión requerida de Java.  
+- **Instalación de dependencias**: Ejecuta `npm install` para instalar las dependencias del proyecto.  
+- **Ejecución de pruebas**: Corre las pruebas utilizando Jest con el comando `npm test`.  
+- **Configuración de SonarScanner**:  
+  - Instala SonarScanner.  
+  - Configura y ejecuta el escáner, enviando los resultados a SonarCloud para análisis de calidad del código.  
 
 ### Despliegue Continuo (CD)
 
-- **Archivo**: `.github/workflows/deploy.yml`
-- **Descripción**: Construye y despliega la aplicación en un clúster de Kubernetes.
+El workflow de CD automatiza la construcción, publicación y despliegue del proyecto en un entorno Kubernetes.  
+
+#### 2. Build and Push Docker Image  
+Este workflow se ejecuta **únicamente** al realizar un push a la rama `main`. Sus pasos incluyen:  
+
+- **Inicio de sesión en DockerHub**: Autentica para permitir el manejo de imágenes.  
+- **Construcción y publicación de la imagen Docker**:  
+  - Construye la imagen usando el `Dockerfile` del repositorio.  
+  - Publica la imagen en [DockerHub](https://hub.docker.com/repository/docker/moravak/todo-app/general).  
+- **Despliegue en Kubernetes**:  
+  - Establece conexión SSH con una instancia EC2 de AWS.  
+  - Descarga los archivos de configuración de Kubernetes (`deployment.yaml` y `service.yaml`) desde la carpeta `k8s` del repositorio.  
+  - Aplica la configuración al clúster Kubernetes preexistente.  
 
 ---
 
